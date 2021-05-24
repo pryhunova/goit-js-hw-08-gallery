@@ -8,7 +8,7 @@ const refs = {
     lightboxOverlay: document.querySelector(".lightbox__overlay"),
 };
 
-refs.galleryContainer.addEventListener('click', onGalleryItemClick);
+refs.galleryContainer.addEventListener('click', onOpenModal);
 refs.lightboxCloseBtn.addEventListener('click', onCloseModal);
 refs.lightboxOverlay.addEventListener('click', onBackdropClick)
 
@@ -36,35 +36,35 @@ function createGalleryCardsMarkup(galleryItems) {
     `;
     })
     .join('');
-}
+};
 
 refs.galleryContainer.insertAdjacentHTML('beforeend', galleryMarkup);
 
-/*слушает клики, preventDefault - отменяет любое действие по умолчанию*/
-
-function onGalleryItemClick(evt) {
-evt.preventDefault()
-   if (!evt.target.classList.contains('gallery__image')) {
-    return;
-  }
-  setAttribute(evt)
-   onOpenModal();
-}
-  
 /*открывает модалку*/
 function onOpenModal(evt) {
-   window.addEventListener('keydown', onEscKeyPress);
-  refs.lightbox.classList.add('is-open');
-  refs.lightboxCloseBtn.addEventListener("click", onCloseModal); //добавляет слушателя события кнопки "закрыть"
-    setAttribute(evt);
-}
+  window.addEventListener('keydown', onEscKeyPress);
+  evt.preventDefault(); /*слушает клики, preventDefault - отменяет любое действие по умолчанию*/
+  
+  if (evt.target.classList.contains('gallery__image')) {
+    refs.lightbox.classList.add('is-open');
+    refs.lightboxImage.src = evt.target.dataset.source;
+    refs.lightboxImage.alt = evt.target.alt;
+
+    refs.lightboxCloseBtn.addEventListener("click", onCloseModal); //добавляет слушателя события кнопки "закрыть"
+    }
+};
   
 /*закрывает модалку */
 function onCloseModal() {
   window.removeEventListener('keydown', onEscKeyPress);
-refs.lightbox.classList.remove('is-open');
-refs.lightboxCloseBtn.removeEventListener("click", onCloseModal); //убирает слушателя события кнопки "закрыть"
-}
+  
+  refs.lightbox.classList.remove('is-open');
+  refs.lightboxCloseBtn.removeEventListener("click", onCloseModal); //убирает слушателя события кнопки "закрыть"
+
+  //Очистка значения атрибута src элемента img.lightbox__image
+  refs.lightboxImage.src = "";
+  refs.lightboxImage.alt = "";
+};
   
 /*закрывает кнопкой ESC*/
 function onEscKeyPress(evt) {
@@ -74,18 +74,11 @@ function onEscKeyPress(evt) {
   if (isEscKey) {
     onCloseModal();
   }
-}
+};
 
-/*Кликнули именно в бекдроп*/
+/*Кликнули в бекдроп*/
 function onBackdropClick(evt) {
   if (evt.currentTarget === evt.target) {
         onCloseModal();
   }
-}
-
-/*Очистка значения атрибута src элемента img.lightbox__image
-Это необходимо для того, чтобы при следующем открытии модального окна, пока грузится изображение, мы не видели предыдущее.*/
-function setAttribute(evt) {
-  refs.lightboxImage.src = evt.target.dataset.source;
-  refs.lightboxImage.alt = evt.target.alt;
-}
+};
